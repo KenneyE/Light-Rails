@@ -10,14 +10,14 @@ class ControllerBase
   # setup the controller
   def initialize(req, res, route_params = {})
     @req, @res = req, res
-    @already_built_response = false
+    @params = Params.new(req, route_params)
   end
 
   # populate the response with content
   # set the responses content type to the given type
   # later raise an error if the developer tries to double render
   def render_content(content, type)
-    raise "Already rendered" if @already_built_response
+    raise "Already rendered" if already_built_response?
     @res.content_type = type
     @res.body = content
     session.store_session(@res)
@@ -26,12 +26,12 @@ class ControllerBase
 
   # helper method to alias @already_built_response
   def already_built_response?
-    @already_built_response
+    !!@already_built_response
   end
 
   # set the response status code and header
   def redirect_to(url)
-    raise "Already rendered" if @already_built_response
+    raise "Already rendered" if already_built_response?
     @res.status = 302
     @res["Location"] = url
     session.store_session(@res)
@@ -43,10 +43,8 @@ class ControllerBase
   def render(template_name)
     controller_name = self.class.name.underscore
     input = File.read("./views/#{controller_name}/#{template_name}.html.erb")
-    # puts "./views/#{controller_name}/#{template_name}.html.erb"
-    b = binding
-    template = ERB.new(input).result b
-    render_content(template, 'text/html')
+
+    render_content(ERB.new(input).result(binding), 'text/html')
   end
 
 

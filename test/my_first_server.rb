@@ -5,7 +5,7 @@ server = WEBrick::HTTPServer.new :Port => 8080, :DocumentRoot => root
 
 server.mount_proc '/' do |req, res|
   res['content_type'] = 'text/text'
-  res.body = req.path
+  res.body = req.query.to_s
 end
 
 trap("INT") { server.shutdown }
