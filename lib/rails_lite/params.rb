@@ -9,7 +9,8 @@ class Params
 
   def initialize(req, route_params = {})
     if req.is_a?(WEBrick::HTTPRequest)
-      @params = {}
+      @permitted_keys = []
+      @params = route_params
       @params.merge!(parse_www_encoded_form(req.query_string)) if req.query_string
       @params.merge!(parse_www_encoded_form(req.body)) if req.body
     end
@@ -20,12 +21,15 @@ class Params
   end
 
   def permit(*keys)
+    keys.each { |key| @permitted_keys << key }
   end
 
   def require(key)
+    raise Params::AttributeNotFoundError if !@params.keys.include?(key)
   end
 
   def permitted?(key)
+    @permitted_keys.include?(key)
   end
 
   def to_s
