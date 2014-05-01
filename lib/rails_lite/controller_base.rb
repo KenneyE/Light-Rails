@@ -44,7 +44,6 @@ class ControllerBase
   def render(template_name)
     controller_name = self.class.name.underscore
     input = File.read("./views/#{controller_name}/#{template_name}.html.erb")
-    session[:flash_count] -= 1 unless session[:flash_count].nil?
     render_content(ERB.new(input).result(binding), 'text/html')
   end
 
