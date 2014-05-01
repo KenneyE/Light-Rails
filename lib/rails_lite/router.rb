@@ -17,7 +17,7 @@ class Route
   # instantiate controller and call controller action
   def run(req, res)
     pattern.match(req.path)
-    route_params = self.pattern.named_captures
+    route_params = self.pattern.named_captures.map
     self.controller_class.new(req, res, route_params).invoke_action(self.action_name)
   end
 end

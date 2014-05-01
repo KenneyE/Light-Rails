@@ -10,14 +10,26 @@ class Session
       found_cookie = cookie if cookie.name == "_rails_lite_app"
     end
     @session = found_cookie.nil? ? {} : JSON.parse(found_cookie.value)
+    @flash = @session.select { |key, val| key == :flash }
+    @session.delete_if { |key, val| key == :flash }
   end
 
   def [](key)
-    @session[key]
+    if key == :flash
+      @flash[key]
+    else
+      @session[key]
+     end
   end
 
   def []=(key, val)
-    @session[key] = val
+    if key == :flash
+      @flash[key] = val
+      @session[:flash_count] = 2
+      @session.merge(@flash)
+    else
+      @session[key] = val
+    end
   end
 
   # serialize the hash into json and save in a cookie

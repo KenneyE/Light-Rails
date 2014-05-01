@@ -2,6 +2,7 @@ require 'erb'
 require 'active_support/inflector'
 require_relative 'params'
 require_relative 'session'
+require_relative 'flash'
 
 
 class ControllerBase
@@ -43,7 +44,7 @@ class ControllerBase
   def render(template_name)
     controller_name = self.class.name.underscore
     input = File.read("./views/#{controller_name}/#{template_name}.html.erb")
-
+    session[:flash_count] -= 1 unless session[:flash_count].nil?
     render_content(ERB.new(input).result(binding), 'text/html')
   end
 
@@ -53,8 +54,30 @@ class ControllerBase
     @session ||= Session.new(@req)
   end
 
+  def reset_session!
+    @session = Session.new(@req)
+  end
+
+  def flash
+    @session[:flash_count] = 2
+    @session[:flash]
+  end
+
   # use this with the router to call action_name (:index, :show, :create...)
   def invoke_action(name)
-    self.send(name)
+    non_csrf_actions = [:index, :show, :edit, :new]
+    if non_csrf_actions.include?(name) || verify_authenticity_token
+      self.send(name)
+    else
+      reset_session!
+    end
+  end
+
+  def form_authenticity_token
+     session[:_csrf_token] ||= SecureRandom.base64(32)
+  end
+
+  def verify_authenticity_token
+    @params[:_csrf_token] == session[:_csrf_token]
   end
 end

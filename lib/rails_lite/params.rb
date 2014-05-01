@@ -6,6 +6,7 @@ class Params
   # 1. query string
   # 2. post body
   # 3. route params
+  attr_reader :params
 
   def initialize(req, route_params = {})
     if req.is_a?(WEBrick::HTTPRequest)
@@ -17,7 +18,7 @@ class Params
   end
 
   def [](key)
-    @params[key]
+    self.params[key]
   end
 
   def permit(*keys)
@@ -33,7 +34,7 @@ class Params
   end
 
   def to_s
-    @params.to_json
+    self.params.to_json
   end
 
   class AttributeNotFoundError < ArgumentError; end;
