@@ -17,8 +17,6 @@ class Flash
     @flash[key]
   end
 
-  # serialize the hash into json and save in a cookie
-  # add to the responses cookies
   def store_flash(res)
 
   end
